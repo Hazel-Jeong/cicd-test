@@ -6,8 +6,8 @@ steps:
     args:
     - '-c'
     - |
-      IMAGE_EXISTS=$(gcloud container images list-tags gcr.io/swit-ops/test-img --filter="tags=$SHORT_SHA" --format="get(tags)")
-      if [[ $IMAGE_EXISTS == *"$SHORT_SHA"* ]]; then
+      iamge_exists=$(gcloud container images list-tags gcr.io/swit-ops/test-img --filter="tags=$SHORT_SHA" --format="get(tags)")
+      if [[ $iamge_exists == *"$SHORT_SHA"* ]]; then
         echo "Image with git SHA tag already exists. Proceeding to tag."
       else
         echo "No image found with git SHA tag. Proceeding with build."
@@ -17,9 +17,8 @@ steps:
   - name: 'gcr.io/kaniko-project/executor:latest'
     id: 'build-and-push'
     args:
-    - --dockerfile=deployments/Dockerfile
-    - --destination=gcr.io/swit-ops/test-img:$BRANCH_NAME:$SHORT_SHA
-    - --destination=us-docker.pkg.dev/swit-ops/test-231019/test-img:$BRANCH_NAME:$SHORT_SHA
+    - --dockerfile=Dockerfile
+    - --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
     - --cache=false
 
   # 이미지에 시멘틱 태그 추가 스텝
@@ -29,8 +28,8 @@ steps:
     - container
     - images
     - add-tag
-    - gcr.io/swit-ops/test-img:$BRANCH_NAME:$SHORT_SHA
-    - gcr.io/swit-ops/test-img:$BRANCH_NAME:$TAG_NAME
+    - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
+    - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$TAG_NAME
 
 options:
   machineType: 'N1_HIGHCPU_8'
