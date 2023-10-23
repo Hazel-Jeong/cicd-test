@@ -17,7 +17,7 @@ steps:
   # 이미지 빌드 및 푸시 스텝
   - name: 'gcr.io/kaniko-project/executor:latest'
     id: 'build-and-push'
-    waitFor: ['-check-git-sha-tag']
+    waitFor: ['check-git-sha-tag']
     entrypoint: 'bash'
     args:
     - '-c'
