@@ -6,7 +6,7 @@ steps:
     args:
     - '-c'
     - |
-      image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img  --format="get(tags)")
+      image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)")
       if [[ $image_exists == *"$SHORT_SHA"* ]]; then
         echo "Image with git SHA tag already exists. Proceeding to tag."
         exit 0
