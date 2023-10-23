@@ -7,7 +7,7 @@ steps:
     - '-c'
     - |
       IMAGE_EXISTS2=$(gcloud container images list-tags gcr.io/swit-ops/test-img --filter="tags=$SHORT_SHA" --format="get(tags)")
-      if [[ $IMAGE_EXISTS == *"$SHORT_SHA"* ]]; then
+      if [[ $IMAGE_EXISTS33 == *"$SHORT_SHA"* ]]; then
         echo "Image with git SHA tag already exists. Proceeding to tag."
       else
         echo "No image found with git SHA tag. Proceeding with build."
