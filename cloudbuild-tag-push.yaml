@@ -22,10 +22,9 @@ steps:
     args:
     - '-c'
     - |
-      if [[ ! -f /workspace/skip_build.txt ]]; then
+      if [ ! -f /workspace/skip_build.txt ]; then
         /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
       fi
-
 
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -37,5 +36,5 @@ steps:
     - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
     - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$TAG_NAME
 
-  options:
+options:
   machineType: 'N1_HIGHCPU_8'
