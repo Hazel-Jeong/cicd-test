@@ -24,6 +24,3 @@ steps:
 
 options:
   machineType: 'N1_HIGHCPU_8'
-
-substitutions:
-  _SHORT_SHA: COMMIT_SHA
