@@ -7,8 +7,8 @@ steps:
     - '-c'
     - |
       echo "SHORT_SHA: $SHORT_SHA"
-      IMAGE_EXISTS2=$(gcloud container images list-tags gcr.io/swit-ops/test-img)
-      echo "IMAGE_EXISTS2"
+      a_IMAGE_EXISTS2=$(gcloud container images list-tags gcr.io/swit-ops/test-img)
+      echo "IMAGE_EXISTS2: $a_IMAGE_EXISTS2"
   #     if [[ $IMAGE_EXISTS2 == *"$SHORT_SHA"* ]]; then
   #       echo "Image with git SHA tag already exists. Proceeding to tag."
   #     else
