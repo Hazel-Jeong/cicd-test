@@ -6,7 +6,7 @@ steps:
     args:
     - '-c'
     - |
-      image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)" | awk -F';' '{print $1}')
+      image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)" 2>&1 | awk -F';' '{print $1}')
       echo "sha: $SHORT_SHA"
       echo "img: $image_exists"
       if [[ $image_exists == "$SHORT_SHA" ]]; then
