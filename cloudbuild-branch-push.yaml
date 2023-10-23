@@ -19,7 +19,7 @@ steps:
   - name: 'gcr.io/kaniko-project/executor:latest'
     id: 'build-and-push'
     args:
-    - --dockerfile=deployments/Dockerfile
+    - --dockerfile=Dockerfile
     # - --destination=gcr.io/swit-ops/test-img:$BRANCH_NAME:$SHORT_SHA
     - --destination=us-docker.pkg.dev/swit-ops/test-231019/test-img:$BRANCH_NAME:$SHORT_SHA
     - --cache=false
