@@ -15,26 +15,27 @@ steps:
       fi
 
   # 이미지 빌드 및 푸시 스텝
-  - name: 'gcr.io/kaniko-project/executor:latest'
-    id: 'build-and-push'
-    waitFor: ['check-git-sha-tag']
-    entrypoint: 'bash'
-    args:
-    - '-c'
-    - |
-      if [[ ! -f /workspace/skip_build.txt ]]; then
-        /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
-      fi
+    - name: 'gcr.io/kaniko-project/executor:latest'
+      id: 'build-and-push'
+      waitFor: ['check-git-sha-tag']
+      entrypoint: '/bin/sh'
+      args:
+      - '-c'
+      - |
+        if [[ ! -f /workspace/skip_build.txt ]]; then
+          /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
+        fi
 
-  # 이미지에 시멘틱 태그 추가 스텝
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'add-semantic-tag'
-    args:
-    - container
-    - images
-    - add-tag
-    - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
-    - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$TAG_NAME
 
-options:
-  machineType: 'N1_HIGHCPU_8'
+    # 이미지에 시멘틱 태그 추가 스텝
+    - name: 'gcr.io/cloud-builders/gcloud'
+      id: 'add-semantic-tag'
+      args:
+      - container
+      - images
+      - add-tag
+      - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
+      - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$TAG_NAME
+
+    options:
+    machineType: 'N1_HIGHCPU_8'
