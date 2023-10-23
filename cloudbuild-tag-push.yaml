@@ -11,8 +11,17 @@ steps:
         echo "Image with git SHA tag already exists. Proceeding to tag."
       else
         echo "No image found with git SHA tag. Proceeding with build."
-        exit 1
       fi
+
+  # 이미지 빌드 및 푸시 스텝. 위의 스텝에서 이미지가 없다고 판단된 경우에만 실행됩니다.
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    id: 'build-and-push'
+    args:
+      - --dockerfile=deployments/Dockerfile
+      - --destination=gcr.io/swit-ops/test-img:$BRANCH_NAME:$SHORT_SHA
+      - --destination=us-docker.pkg.dev/swit-ops/test-231019/test-img:$BRANCH_NAME:$SHORT_SHA
+      - --cache=false
+
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'add-semantic-tag'
