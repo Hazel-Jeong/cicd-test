@@ -18,13 +18,12 @@ steps:
   - name: 'gcr.io/kaniko-project/executor:latest'
     id: 'build-and-push'
     waitFor: ['check-git-sha-tag']
-    entrypoint: '/bin/sh'
     args:
-    - '-c'
-    - |
-      if [ ! -f /workspace/skip_build.txt ]; then
-        /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
-      fi
+    - --dockerfile=Dockerfile
+    - --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
+    - --cache=false
+    - --context=dir://workspace
+    dir: '/workspace'
 
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
