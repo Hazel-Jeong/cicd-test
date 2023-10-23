@@ -1,10 +1,3 @@
-# steps:
-# - name: 'gcr.io/cloud-builders/docker'
-#   args: ['build', '-t', 'gcr.io/swit-ops/test-img:latest', '.']
-# images:
-# - 'gcr.io/swit-ops/test-231019/test-img:latest'
-
-
 steps:
   # 깃 샤값을 기반으로 이미지의 존재 여부를 확인하는 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -13,23 +6,19 @@ steps:
     args:
     - '-c'
     - |
-      # Artifact Registry에서 해당 깃 샤값 태그의 이미지 존재 여부를 확인합니다.
       IMAGE_EXISTS=$(gcloud container images list-tags gcr.io/swit-ops/test-img --filter="tags=$SHORT_SHA" --format="get(tags)")
-
       if [[ $IMAGE_EXISTS == *"$SHORT_SHA"* ]]; then
         echo "Image with git SHA tag already exists. Skipping build."
         exit 0
       else
         echo "No image found with git SHA tag. Proceeding with build."
       fi
-
-  # 이전 스텝에서 이미지가 존재하지 않는 경우, 실제 이미지 빌드 및 푸시 스텝이 실행됩니다.
+  # 이미지 빌드 및 푸시 스텝
   - name: 'gcr.io/kaniko-project/executor:latest'
     args:
-      - --dockerfile=deployments/Dockerfile
-      - --destination=gcr.io/swit-ops/test-img:$BRANCH_NAME:$TAG_NAME
-      - --destination=us-docker.pkg.dev/swit-ops/test-231019/test-img:$BRANCH_NAME:$TAG_NAME
-      - --cache=false
+    - --dockerfile=deployments/Dockerfile
+    - --destination=gcr.io/swit-ops/test-img:$BRANCH_NAME:$SHORT_SHA
+    - --cache=false
 
 options:
   machineType: 'N1_HIGHCPU_8'
