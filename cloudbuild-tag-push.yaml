@@ -50,8 +50,6 @@ steps:
   # 조건부로 이미지 빌드 및 푸시 스텝
   - name: 'moby/buildkit:latest'
     id: 'conditional-buildkit-build'
-    env:
-      - BUILDKITD_FLAGS=--oci-worker-no-process-sandbox
     entrypoint: 'buildctl-daemonless.sh'
     args:
     - build
