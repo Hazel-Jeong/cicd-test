@@ -29,7 +29,6 @@
 
 # options:
 #   machineType: 'N1_HIGHCPU_8'
-
 steps:
   # 이미지가 존재하는지 확인
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -41,13 +40,13 @@ steps:
       image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)")
       if [[ $image_exists == "$SHORT_SHA" ]]; then
         echo "이미지가 있따 파일을 생성한닷"
-        echo "Image exists" > /workspace/image_status.txt
+        echo "Image exists" > /workspace_status/image_status.txt
       else
         echo "이미지가 업따 파일을 생성한닷"
-        echo "Image does not exist" > /workspace/image_status.txt
+        echo "Image does not exist" > /workspace_status/image_status.txt
       fi
       echo "파일 내용 확인을 해보자"
-      cat /workspace/image_status.txt   # 파일 내용 확인
+      cat /workspace_status/image_status.txt   # 파일 내용 확인
 
   # 조건부 이미지 빌드 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -56,17 +55,13 @@ steps:
     args:
     - '-c'
     - |
-      if grep -q "Image does not exist" /workspace/image_status.txt; then
+      if grep -q "Image does not exist" /workspace_status/image_status.txt; then
         /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false --context=dir://workspace/
       else
         echo "Image already exists. Skipping build."
       fi
-    volumes:
-    - name: 'workspace'
-      path: '/workspace'
     waitFor:
     - 'check-if-image-exists'
-
 
 
   # 이미지에 시멘틱 태그 추가 스텝
