@@ -57,19 +57,19 @@ steps:
     - '--destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA'
     - '--cache=false'
     - '--context=dir://workspace/'  # 빌드 컨텍스트 지정
-    waitFor:
-    - 'check-if-image-exists'
-    entrypoint: 'bash'
     volumes:
     - name: 'workspace'
       path: '/workspace'
+    waitFor:
+    - 'conditional-check'
+    entrypoint: '/kaniko/executor'
     script: |
-      if grep -q "Image does not exist" /workspace/image_status.txt; then
+      if grep -q "not-exists" /workspace/image_status.txt; then
         /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
       else
         echo "Image already exists. Skipping build."
       fi
-
+      
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'add-semantic-tag'
