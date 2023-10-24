@@ -10,9 +10,9 @@ steps:
       echo "sha: $SHORT_SHA"
       echo "img: $image_exists"
       if [[ $image_exists == "$SHORT_SHA" ]]; then
-        echo "Image with git SHA tag already exists. Proceeding to tag."
+        echo "Image with git SHA tag already exists. Proceeding to tag. 태그가 이미 있따"
       else
-        echo "No image found with git SHA tag. Proceeding with build."
+        echo "No image found with git SHA tag. Proceeding with build. 태그가 업따"
         /kaniko/executor --context=dir://. --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
       fi
 
