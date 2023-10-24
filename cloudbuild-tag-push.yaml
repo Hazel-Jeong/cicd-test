@@ -49,20 +49,25 @@ steps:
       echo "파일 내용 확인을 해보자"
       cat /workspace/image_status.txt   # 파일 내용 확인
 
-# 이미지 빌드 (조건부)
+  # 이미지 빌드 (조건부)
   - name: 'gcr.io/kaniko-project/executor:latest'
     id: 'build-image'
-    entrypoint: '/bin/sh'   # 여기를 수정했습니다.
     args:
-    - '-c'
-    - |
-      echo "파일 내용 확인을 해보자"
-      cat /workspace/image_status.txt   # 파일 내용 확인
+    - '--dockerfile=Dockerfile'
+    - '--destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA'
+    - '--cache=false'
+    - '--context=dir://workspace/'  # 빌드 컨텍스트 지정
+    waitFor:
+    - 'check-if-image-exists'
+    entrypoint: 'bash'
+    volumes:
+    - name: 'workspace'
+      path: '/workspace'
+    script: |
       if grep -q "Image does not exist" /workspace/image_status.txt; then
-        echo "이미지 없다는 파일내용이 있따 빌드를 실행한다"
         /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
       else
-        echo "Image already exists. Skipping build. 파일을 보니 이미 있는 이미지다. 빌드를 스킵한다"
+        echo "Image already exists. Skipping build."
       fi
 
   # 이미지에 시멘틱 태그 추가 스텝
