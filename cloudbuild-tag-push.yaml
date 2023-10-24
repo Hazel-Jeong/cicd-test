@@ -37,17 +37,17 @@ steps:
     args:
     - '-c'
     - |
-      mkdir -p /workspace_status
+      mkdir -p /workspace/status
       image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)")
       if [[ $image_exists == "$SHORT_SHA" ]]; then
         echo "이미지가 있따 파일을 생성한닷"
-        echo "Image exists" > /workspace_status/image_status.txt
+        echo "Image exists" > /workspace/status/image_status.txt
       else
         echo "이미지가 업따 파일을 생성한닷"
-        echo "Image does not exist" > /workspace_status/image_status.txt
+        echo "Image does not exist" > /workspace/status/image_status.txt
       fi
       echo "파일 내용 확인을 해보자"
-      cat /workspace_status/image_status.txt   # 파일 내용 확인
+      cat /workspace/status/image_status.txt   # 파일 내용 확인
 
   # 조건부 이미지 빌드 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -56,7 +56,7 @@ steps:
     args:
     - '-c'
     - |
-      if grep -q "Image does not exist" /workspace_status/image_status.txt; then
+      if grep -q "Image does not exist" /workspace/status/image_status.txt; then
         /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false --context=dir://workspace/
       else
         echo "Image already exists. Skipping build."
