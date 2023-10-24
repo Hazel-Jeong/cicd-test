@@ -52,9 +52,6 @@ steps:
     id: 'conditional-buildkit-build'
     env:
       - BUILDKITD_FLAGS=--oci-worker-no-process-sandbox
-    volumes:
-      - name: 'buildkit-cache'
-        path: /var/lib/buildkit
     entrypoint: 'buildctl-daemonless.sh'
     args:
     - build
