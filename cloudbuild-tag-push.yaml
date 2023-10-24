@@ -50,18 +50,20 @@ steps:
   # 조건부로 이미지 빌드 및 푸시 스텝
   - name: 'moby/buildkit:latest'
     id: 'conditional-buildkit-build'
-    entrypoint: 'bash'
+    env:
+      - BUILDKITD_FLAGS=--oci-worker-no-process-sandbox
+    volumes:
+      - name: 'buildkit-cache'
+        path: /var/lib/buildkit
+    entrypoint: 'buildctl-daemonless.sh'
     args:
-    - '-c'
-    - |
-      if grep -q "false" /workspace/status/skip_build.txt; then
-        # BuildKit을 사용하여 빌드 수행
-        # 다음은 BuildKit을 사용하는 기본 예시이므로 실제 필요한 인수로 수정해야 합니다.
-        buildctl build --frontend dockerfile.v0 --local context=. --local dockerfile=. --output type=image,name=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA,push=true
-      else
-        echo "Image already exists. Skipping build."
-      fi
+    - build
+    - --frontend=dockerfile.v0
+    - --local=context=/workspace
+    - --local=dockerfile=/workspace
+    - --output=type=image,name=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA,push=true
     waitFor: ['check-git-sha-tag']
+
 
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
