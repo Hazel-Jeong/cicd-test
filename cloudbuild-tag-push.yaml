@@ -37,6 +37,7 @@ steps:
     args:
     - '-c'
     - |
+      mkdir -p /workspace_status
       image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)")
       if [[ $image_exists == "$SHORT_SHA" ]]; then
         echo "이미지가 있따 파일을 생성한닷"
@@ -62,7 +63,6 @@ steps:
       fi
     waitFor:
     - 'check-if-image-exists'
-
 
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
