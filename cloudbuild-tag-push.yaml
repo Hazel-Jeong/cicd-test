@@ -47,10 +47,10 @@ steps:
         echo "Image does not exist" > /workspace/image_status.txt
       fi
 
-  # 이미지 빌드 (조건부)
+# 이미지 빌드 (조건부)
   - name: 'gcr.io/kaniko-project/executor:latest'
     id: 'build-image'
-    entrypoint: 'bash'
+    entrypoint: '/bin/sh'   # 여기를 수정했습니다.
     args:
     - '-c'
     - |
