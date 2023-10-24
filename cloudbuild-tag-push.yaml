@@ -50,16 +50,22 @@ steps:
   # 조건부로 이미지 빌드 및 푸시 스텝
   - name: 'gcr.io/kaniko-project/executor:latest'
     id: 'conditional-kaniko-build'
-    entrypoint: 'sh'
-    args:
-    - '-c'
-    - |
-      if [ ! "$(cat /workspace/status/skip_build.txt)" = "true" ]; then
-        /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false --context=dir://workspace/
-      else
-        echo "Skipping build as image already exists."
-      fi
-    waitFor: ['check-git-sha-tag']
+    entrypoint: [""]
+    # args:
+    # - '-c'
+    # - |
+    #   if [ ! "$(cat /workspace/status/skip_build.txt)" = "true" ]; then
+    #     /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false --context=dir://workspace/
+    #   else
+    #     echo "Skipping build as image already exists."
+    #   fi
+    script: |
+        if grep -q "false" /workspace/status/skip_build.txt; then
+          /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
+        else
+          echo "Image already exists. Skipping build."
+        fi      
+    # waitFor: ['check-git-sha-tag']
 
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
