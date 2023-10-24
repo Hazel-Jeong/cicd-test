@@ -55,7 +55,7 @@ steps:
     - '-c'
     - |
       if grep -q "false" /workspace/status/skip_build.txt; then
-        /bin/buildctl-daemonless.sh build \
+        buildctl-daemonless.sh build \
           --frontend=dockerfile.v0 \
           --local=context=/workspace \
           --local=dockerfile=/workspace \
@@ -64,6 +64,7 @@ steps:
         echo "Image already exists. Skipping build."
       fi
     waitFor: ['check-git-sha-tag']
+
 
 
 
