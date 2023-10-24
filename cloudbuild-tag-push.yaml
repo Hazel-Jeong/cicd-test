@@ -1,19 +1,64 @@
+# steps:
+#   # 깃 샤값을 기반으로 이미지의 존재 여부를 확인하고 없으면 빌드하는 스텝
+#   - name: 'gcr.io/cloud-builders/gcloud'
+#     id: 'check-git-sha-tag-and-build'
+#     entrypoint: 'bash'
+#     args:
+#     - '-c'
+#     - |
+#       image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)" 2>&1 | awk -F';' '{print $1}')
+#       echo "sha: $SHORT_SHA"
+#       echo "img: $image_exists"
+#       if [[ $image_exists == "$SHORT_SHA" ]]; then
+#         echo "Image with git SHA tag already exists. Proceeding to tag. 태그가 이미 있따"
+#       else
+#         echo "No image found with git SHA tag. Proceeding with build. 태그가 업따"
+#         /kaniko/executor --context=dir://. --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
+#       fi
+
+#   # 이미지에 시멘틱 태그 추가 스텝
+#   - name: 'gcr.io/cloud-builders/gcloud'
+#     id: 'add-semantic-tag'
+#     args:
+#     - container
+#     - images
+#     - add-tag
+#     - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
+#     - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$TAG_NAME
+#     - -q
+
+# options:
+#   machineType: 'N1_HIGHCPU_8'
+
 steps:
-  # 깃 샤값을 기반으로 이미지의 존재 여부를 확인하고 없으면 빌드하는 스텝
+  # 이미지가 존재하는지 확인
   - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'check-git-sha-tag-and-build'
+    id: 'check-if-image-exists'
     entrypoint: 'bash'
     args:
     - '-c'
     - |
-      image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)" 2>&1 | awk -F';' '{print $1}')
-      echo "sha: $SHORT_SHA"
-      echo "img: $image_exists"
+      image_exists=$(gcloud container images list-tags us-west1-docker.pkg.dev/swit-ops/test-231019/test-img --filter="tags:$SHORT_SHA" --format="get(tags)")
       if [[ $image_exists == "$SHORT_SHA" ]]; then
-        echo "Image with git SHA tag already exists. Proceeding to tag. 태그가 이미 있따"
+        echo "이미지가 있따 파일을 생성한닷"
+        echo "Image exists" > /workspace/image_status.txt
       else
-        echo "No image found with git SHA tag. Proceeding with build. 태그가 업따"
-        /kaniko/executor --context=dir://. --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
+        echo "이미지가 업따 파일을 생성한닷"
+        echo "Image does not exist" > /workspace/image_status.txt
+      fi
+
+  # 이미지 빌드 (조건부)
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    id: 'build-image'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      if grep -q "Image does not exist" /workspace/image_status.txt; then
+        echo "이미지 없다는 파일내용이 있따 빌드를 실행한다"
+        /kaniko/executor --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA --cache=false
+      else
+        echo "Image already exists. Skipping build. 파일을 보니 이미 있는 이미지다. 빌드를 스킵한다"
       fi
 
   # 이미지에 시멘틱 태그 추가 스텝
