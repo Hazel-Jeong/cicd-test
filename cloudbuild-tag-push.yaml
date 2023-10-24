@@ -50,14 +50,21 @@ steps:
   # 조건부로 이미지 빌드 및 푸시 스텝
   - name: 'moby/buildkit:latest'
     id: 'conditional-buildkit-build'
-    entrypoint: 'buildctl-daemonless.sh'
+    entrypoint: 'sh'
     args:
-    - build
-    - --frontend=dockerfile.v0
-    - --local=context=/workspace
-    - --local=dockerfile=/workspace
-    - --output=type=image,name=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA,push=true
+    - '-c'
+    - |
+      if grep -q "false" /workspace/status/skip_build.txt; then
+        /bin/buildctl-daemonless.sh build \
+          --frontend=dockerfile.v0 \
+          --local=context=/workspace \
+          --local=dockerfile=/workspace \
+          --output=type=image,name=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA,push=true
+      else
+        echo "Image already exists. Skipping build."
+      fi
     waitFor: ['check-git-sha-tag']
+
 
 
   # 이미지에 시멘틱 태그 추가 스텝
