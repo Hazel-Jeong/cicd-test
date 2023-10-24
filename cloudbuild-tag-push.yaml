@@ -1,7 +1,7 @@
 steps:
-  # 깃 샤값을 기반으로 이미지의 존재 여부를 확인하는 스텝
+  # 깃 샤값을 기반으로 이미지의 존재 여부를 확인하고 없으면 빌드하는 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'check-git-sha-tag'
+    id: 'check-git-sha-tag-and-build'
     entrypoint: 'bash'
     args:
     - '-c'
@@ -11,21 +11,10 @@ steps:
       echo "img: $image_exists"
       if [[ $image_exists == "$SHORT_SHA" ]]; then
         echo "Image with git SHA tag already exists. Proceeding to tag."
-        echo "true" > /workspace/skip_build.txt
       else
         echo "No image found with git SHA tag. Proceeding with build."
+        /kaniko/executor --context=dir://. --dockerfile=Dockerfile --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
       fi
-
-  # 이미지 빌드 및 푸시 스텝
-  - name: 'gcr.io/kaniko-project/executor:latest'
-    id: 'build-and-push'
-    waitFor: ['check-git-sha-tag']
-    args:
-    - --dockerfile=Dockerfile
-    - --destination=us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
-    - --cache=false
-    - --context=dir://.
-
 
   # 이미지에 시멘틱 태그 추가 스텝
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -36,6 +25,7 @@ steps:
     - add-tag
     - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$SHORT_SHA
     - us-west1-docker.pkg.dev/swit-ops/test-231019/test-img:$TAG_NAME
+    - -q
 
 options:
   machineType: 'N1_HIGHCPU_8'
